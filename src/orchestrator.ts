@@ -285,7 +285,7 @@ export async function delegateToAgent(
     void sendAsAgent(
       agentConfig.botToken,
       chatId,
-      `👋 Принял задачу от ${senderName}: ${taskPreview}`,
+      `👋 Task received from ${senderName}: ${taskPreview}`,
     );
   }
 
@@ -469,7 +469,7 @@ export async function reportToCoordinator(
   // Send via main bot's Telegram
   const mainBotToken = TELEGRAM_BOT_TOKEN;
   if (mainBotToken) {
-    const text = `${emoji} Отчёт от ${agentName}:\n\n${message}`;
+    const text = `${emoji} Report from ${agentName}:\n\n${message}`;
     await sendAsAgent(mainBotToken, chatId, text);
   }
 
@@ -547,7 +547,7 @@ export async function delegateToMultiple(
 
   const succeeded = results.filter((r) => !r.error).length;
   const failed = results.filter((r) => r.error).length;
-  onProgress?.(`🔀 Параллельная делегация завершена: ${succeeded} успешно, ${failed} ошибок`);
+  onProgress?.(`🔀 Parallel delegation completed: ${succeeded} succeeded, ${failed} errors`);
 
   return results;
 }
@@ -612,7 +612,7 @@ export async function runChain(
           logger.warn({ chainId, step: i + 1, attempt: attempt + 1, agent: step.agent_id }, 'Retrying failed chain step');
           await reportToCoordinator(
             'main',
-            `🔁 Цепочка "${chainName}": повтор шага ${i + 1} (${step.agent_id}), попытка ${attempt + 1}`,
+            `🔁 Chain "${chainName}": retry step ${i + 1} (${step.agent_id}), attempt ${attempt + 1}`,
             'alert',
           );
         }
@@ -653,7 +653,7 @@ export async function runChain(
 
       await reportToCoordinator(
         'main',
-        `Цепочка "${chainName}" упала на шаге ${i + 1} (${step.agent_id}) после ${MAX_RETRIES + 1} попыток: ${errMsg.slice(0, 200)}`,
+        `Chain "${chainName}" failed at step ${i + 1} (${step.agent_id}) after ${MAX_RETRIES + 1} attempts: ${errMsg.slice(0, 200)}`,
         'alert',
       );
       throw lastErr;
@@ -677,7 +677,7 @@ export async function runChain(
   // Report success
   await reportToCoordinator(
     'main',
-    `Цепочка "${chainName}" выполнена.\n\nРезультат:\n${prevResult.slice(0, 500)}`,
+    `Chain "${chainName}" completed.\n\nResult:\n${prevResult.slice(0, 500)}`,
     'result',
   );
 

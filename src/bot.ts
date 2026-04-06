@@ -357,7 +357,7 @@ function isAuthorised(chatId: number): boolean {
     // Not yet configured — let every request through but warn in the reply handler
     return true;
   }
-  return chatId.toString() === ALLOWED_CHAT_ID;
+  const allowed = ALLOWED_CHAT_ID.split(",").map(id => id.trim()); return allowed.includes(chatId.toString());
 }
 
 /**
@@ -1253,7 +1253,25 @@ export function createBot(): Bot {
     if (state) waState.delete(chatIdStr);
     if (slkState) slackState.delete(chatIdStr);
     // Fire-and-forget so grammY can process /stop while agent runs
-    messageQueue.enqueue(chatIdStr, () => handleMessage(ctx, text));
+    // Prepend sender name in group chats so agent knows who is talking
+    const isGroup = ctx.chat!.type === 'group' || ctx.chat!.type === 'supergroup';
+
+    // In groups: only respond if bot is @mentioned or message is a reply to bot
+    if (isGroup) {
+      const botUsername = ctx.me?.username || '';
+      const isMentioned = botUsername && text.includes("@" + botUsername);
+      const isReplyToBot = ctx.message?.reply_to_message?.from?.id === ctx.me?.id;
+      if (!isMentioned && !isReplyToBot) {
+        return;
+      }
+    }
+
+    const senderName = ctx.from?.first_name || ctx.from?.username || 'Unknown';
+    const senderUsername = ctx.from?.username ? '@' + ctx.from.username : '';
+    const enrichedText = isGroup
+      ? '[From: ' + senderName + ' ' + senderUsername + '] ' + text
+      : text;
+    messageQueue.enqueue(chatIdStr, () => handleMessage(ctx, enrichedText));
   });
 
   // Voice messages — real transcription via Groq Whisper
