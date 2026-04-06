@@ -39,7 +39,7 @@ function ensureBoardFile(): void {
 }
 
 function now(): string {
-  return new Date().toLocaleString('en-US', { timeZone: 'YOUR_TIMEZONE', hour12: false });
+  return new Date().toLocaleString('en-US', { timeZone: 'Europe/Warsaw', hour12: false });
 }
 
 /**

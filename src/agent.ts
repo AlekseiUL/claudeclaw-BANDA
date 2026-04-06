@@ -35,18 +35,18 @@ export interface AgentProgressEvent {
 
 /** Map SDK tool names to Russian descriptive labels (what the bot is doing). */
 const TOOL_LABELS: Record<string, string> = {
-  Read: 'Читаю файл',
-  Write: 'Пишу файл',
-  Edit: 'Редактирую файл',
-  Bash: 'Выполняю команду',
-  Grep: 'Ищу в коде',
-  Glob: 'Ищу файлы',
-  WebSearch: 'Ищу в интернете',
-  WebFetch: 'Загружаю страницу',
-  Agent: 'Запускаю подзадачу',
-  NotebookEdit: 'Редактирую ноутбук',
-  AskUserQuestion: 'Готовлю вопрос',
-  Skill: 'Использую скилл',
+  Read: 'Reading file',
+  Write: 'Writing file',
+  Edit: 'Editing file',
+  Bash: 'Running command',
+  Grep: 'Searching code',
+  Glob: 'Finding files',
+  WebSearch: 'Searching web',
+  WebFetch: 'Fetching page',
+  Agent: 'Running subtask',
+  NotebookEdit: 'Editing notebook',
+  AskUserQuestion: 'Preparing question',
+  Skill: 'Using skill',
   EnterPlanMode: 'Планирую',
   ExitPlanMode: 'План готов',
 };
@@ -263,7 +263,7 @@ export async function runAgent(
         inDelegation++;
         if (onProgress) {
           const desc = (ev['description'] as string) ?? '';
-          onProgress({ type: 'task_started', description: desc ? `Запускаю подзадачу: ${desc}` : 'Запускаю подзадачу' });
+          onProgress({ type: 'task_started', description: desc ? `Running subtask: ${desc}` : 'Running subtask' });
         }
       }
       if (ev['type'] === 'system' && ev['subtype'] === 'task_notification') {
@@ -274,8 +274,8 @@ export async function runAgent(
           onProgress({
             type: 'task_completed',
             description: status === 'failed'
-              ? `Подзадача не удалась: ${summary}`
-              : summary ? `Подзадача завершена: ${summary}` : 'Подзадача завершена',
+              ? `Subtask failed: ${summary}`
+              : summary ? `Subtask completed: ${summary}` : 'Subtask completed',
           });
         }
       }

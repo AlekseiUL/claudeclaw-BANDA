@@ -619,6 +619,9 @@ export function searchMemories(
   // Strategy 1: Vector similarity search with recency boost + agent affinity
   if (queryEmbedding && queryEmbedding.length > 0) {
     const candidates = getMemoriesWithEmbeddings(chatId);
+    // Also include memories from all chats for cross-context awareness
+    const allChatCandidates = getMemoriesWithEmbeddings(null as any);
+    for (const m of allChatCandidates) { if (!candidates.find(c => c.id === m.id)) candidates.push(m); }
     if (candidates.length > 0) {
       const scored = candidates
         .filter(isVisible)
@@ -708,8 +711,8 @@ const MAX_EMBEDDING_CANDIDATES = 500;
 
 export function getMemoriesWithEmbeddings(chatId: string): Array<{ id: number; embedding: number[]; summary: string; importance: number; created_at: number; agent_id: string; memory_type?: string }> {
   const rows = db
-    .prepare('SELECT id, embedding, summary, importance, created_at, agent_id, memory_type FROM memories WHERE chat_id = ? AND embedding IS NOT NULL ORDER BY created_at DESC LIMIT ?')
-    .all(chatId, MAX_EMBEDDING_CANDIDATES) as Array<{ id: number; embedding: string; summary: string; importance: number; created_at: number; agent_id: string; memory_type?: string }>;
+    .prepare('SELECT id, embedding, summary, importance, created_at, agent_id, memory_type FROM memories WHERE embedding IS NOT NULL ORDER BY created_at DESC LIMIT ?')
+    .all(MAX_EMBEDDING_CANDIDATES) as Array<{ id: number; embedding: string; summary: string; importance: number; created_at: number; agent_id: string; memory_type?: string }>;
   return rows.map((r) => ({
     id: r.id,
     embedding: JSON.parse(r.embedding) as number[],
